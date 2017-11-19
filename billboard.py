@@ -13,8 +13,28 @@ def update_month(year,month):
     if month<12:
         return [year,month+1]
     return [year+1,1]
+
 def get_song_info(id):
-    return ["","",""]
+    song_info_url = "http://www.genie.co.kr/detail/songInfo?xgnm=" + str(id)
+    targetRequest = Request(song_info_url)
+    response = urlopen(targetRequest)
+    responseText = response.read().decode('utf-8', 'ignore')
+    soup = BeautifulSoup(responseText, 'html.parser')
+
+    song_elems = soup.select('#body-content > div.song-main-infos > div.info-zone > h2')
+    lyrics_elems = soup.select('#pLyrics')
+    artist_elems = soup.select('#body-content > div.song-main-infos > div.info-zone > ul > li:nth-of-type(1) > span.value > a')
+    #:nth-of-type(4)
+    song_name = song_elems[0].text.strip()
+    lyrics = lyrics_elems[0].text.strip()
+    artist = artist_elems[0].text.strip()
+
+    #print(song_name,artist,lyrics)
+    return [song_name,artist,lyrics]
+def get_fname(year,month):
+    year = int(year)
+    month = int(month)
+    return str((year - 2015)*12 + month - 10)
 
 def parse_month(year,month):
     year = str(year)
@@ -26,38 +46,28 @@ def parse_month(year,month):
     responseText = response.read().decode('utf-8','ignore')
     soup = BeautifulSoup(responseText,'html.parser')
     #:nth-of-type(2)
-    songs = [0]*SONG_PER_MONTH
-    artists = [0]*SONG_PER_MONTH
-    lyrics = [0]*SONG_PER_MONTH
+    song_names = [""]*SONG_PER_MONTH
+    artists = [""]*SONG_PER_MONTH
+    lyrics = [""]*SONG_PER_MONTH
     all_songs = soup.select("#sAllSongID")
-    song_ids = all_songs[0]['value'].strip(';')
+    song_ids = all_songs[0]['value'].strip().split(';')
 
     for i in range(SONG_PER_MONTH):
-        songs[i],artists[i],lyrics[i] = get_song_info(song_ids[i])
+        print(song_ids[i])
+        song_names[i],artists[i],lyrics[i] = get_song_info(song_ids[i])
+        print(song_names[i])
 
-    return [[],[]]
+    with open(get_fname(year,month) + "_songs.txt", 'w',encoding = 'utf-8') as file:
+        for i in range(SONG_PER_MONTH):
+            print(song_names[i])
+            file.write(song_names[i]+"\n")
 
-    song_elems = soup.select('#body-content > div.song-main-infos > div.info-zone > h2')
-    lyrics_elems = soup.select('#pLyrics')
-    artist_elems = soup.select('#body-content > div.song-main-infos > div.info-zone > ul > li:nth-of-type(1) > span.value > a')
-    #:nth-of-type(4)
-    #BoardType1 > table > tbody > tr:nth-child(2) > td:nth-child(4)
-    print(song_elems[0].text.strip())
-    print(lyrics_elems[0].text)
-    print(artist_elems[0].text)
-    #for x in song_elems[:SONG_PER_MONTH]:
-    #    songs.append(x.text)
-    #print(songs)
-
-    #for x in artist_elems[:SONG_PER_MONTH]:
-    #    artists.append(x.text)
-    #print(artists)
-    return [songs,artists]
+    return [song_names,artists,lyrics]
 
 cur_year = START_YEAR
 cur_month = START_MONTH
 
 while(cur_year != END_YEAR or cur_month != END_MONTH):
-    print(parse_month(cur_year, cur_month))
+    parse_month(cur_year, cur_month)
     cur_year,cur_month = update_month(cur_year,cur_month)
 
