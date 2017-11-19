@@ -9,6 +9,7 @@ START_MONTH = 12
 END_YEAR = 2017
 END_MONTH = 11
 COUNT = 0
+banned_artist = ["Ed Sheeran","Maroon 5","Adele","Lasse Lindh","The Chainsmokers","The Chainsmokers & Coldplay"]
 def update_month(year,month):
     if month<12:
         return [year,month+1]
@@ -16,6 +17,7 @@ def update_month(year,month):
 
 def get_song_info(id):
     song_info_url = "http://www.genie.co.kr/detail/songInfo?xgnm=" + str(id)
+    #print(song_info_url)
     targetRequest = Request(song_info_url)
     response = urlopen(targetRequest)
     responseText = response.read().decode('utf-8', 'ignore')
@@ -26,9 +28,17 @@ def get_song_info(id):
     artist_elems = soup.select('#body-content > div.song-main-infos > div.info-zone > ul > li:nth-of-type(1) > span.value > a')
     #:nth-of-type(4)
     song_name = song_elems[0].text.strip()
-    lyrics = lyrics_elems[0].text.strip()
     artist = artist_elems[0].text.strip()
 
+    if "19금" in song_name:
+        return ["", artist, ""]
+    if len(lyrics_elems) > 0:
+        lyrics = lyrics_elems[0].text.strip()
+    else:
+        lyrics = ""
+
+    if artist in banned_artist:
+        return [song_name,artist,""]
     #print(song_name,artist,lyrics)
     return [song_name,artist,lyrics]
 def get_fname(year,month):
@@ -39,9 +49,11 @@ def get_fname(year,month):
 def parse_month(year,month):
     global COUNT
     year = str(year)
-    month = str(month)
+    month = str(month).zfill(2)
+    print(year,month)
+
     song_info_url = "http://www.genie.co.kr/detail/songInfo?xgnm=87463708"
-    targetUrl = "http://www.genie.co.kr/chart/top100?ditc=M&ymd=20171001&hh=13&rtm=N&pg=1"
+    targetUrl = "http://www.genie.co.kr/chart/top100?ditc=M&ymd=" + year + month + "01&hh=13&rtm=N&pg=1"
     targetRequest = Request(targetUrl)
     response = urlopen(targetRequest)
     responseText = response.read().decode('utf-8','ignore')
@@ -75,7 +87,6 @@ cur_year = START_YEAR
 cur_month = START_MONTH
 
 while(cur_year != END_YEAR or cur_month != END_MONTH):
-    print(cur_year,cur_month)
     parse_month(cur_year, cur_month)
     cur_year,cur_month = update_month(cur_year,cur_month)
 
