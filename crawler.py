@@ -37,7 +37,7 @@ def parse_month(year,month):
     for x in artist_elems[:SONG_PER_MONTH]:
         artists.append(x.text)
     #print(artists)
-    with open("noraebang" + str(COUNT) + "_songs.txt", 'w',encoding = 'utf-8') as file:
+    with open("noraebang_data/noraebang" + str(COUNT) + "_songs.txt", 'w',encoding = 'utf-8') as file:
         for i in range(SONG_PER_MONTH):
             file.write(songs[i]+ ":" + artists[i] + "\n")
 

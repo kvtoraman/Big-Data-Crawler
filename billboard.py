@@ -3,12 +3,12 @@
 from urllib.request import Request, urlopen
 from bs4 import BeautifulSoup
 
-SONG_PER_MONTH = 20
-START_YEAR = 2017
-START_MONTH = 9
+SONG_PER_MONTH = 40
+START_YEAR = 2015
+START_MONTH = 12
 END_YEAR = 2017
-END_MONTH = 10
-
+END_MONTH = 11
+COUNT = 0
 def update_month(year,month):
     if month<12:
         return [year,month+1]
@@ -37,6 +37,7 @@ def get_fname(year,month):
     return str((year - 2015)*12 + month - 10)
 
 def parse_month(year,month):
+    global COUNT
     year = str(year)
     month = str(month)
     song_info_url = "http://www.genie.co.kr/detail/songInfo?xgnm=87463708"
@@ -53,21 +54,28 @@ def parse_month(year,month):
     song_ids = all_songs[0]['value'].strip().split(';')
 
     for i in range(SONG_PER_MONTH):
-        print(song_ids[i])
+        #print(song_ids[i])
         song_names[i],artists[i],lyrics[i] = get_song_info(song_ids[i])
-        print(song_names[i])
+        #(song_names[i])
 
-    with open(get_fname(year,month) + "_songs.txt", 'w',encoding = 'utf-8') as file:
+    with open("billboard_data/bb" + str(COUNT) + "_lyrics.txt", 'w',encoding = 'utf-8') as file:
         for i in range(SONG_PER_MONTH):
-            print(song_names[i])
-            file.write(song_names[i]+"\n")
+            #print(song_names[i])
+            lyrics[i] = lyrics[i].replace('\r\n', '\n')
+            file.write(lyrics[i].replace('\n',' ') + "\n")
 
+    with open("billboard_data/bb" + str(COUNT) + "_songs.txt", 'w',encoding = 'utf-8') as file:
+        for i in range(SONG_PER_MONTH):
+            file.write(song_names[i]+ ":" + artists[i] + "\n")
+
+    COUNT += 1
     return [song_names,artists,lyrics]
 
 cur_year = START_YEAR
 cur_month = START_MONTH
 
 while(cur_year != END_YEAR or cur_month != END_MONTH):
+    print(cur_year,cur_month)
     parse_month(cur_year, cur_month)
     cur_year,cur_month = update_month(cur_year,cur_month)
 
