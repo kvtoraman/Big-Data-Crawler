@@ -2,6 +2,7 @@
 
 from urllib.request import Request, urlopen
 from bs4 import BeautifulSoup
+import string
 
 SONG_PER_MONTH = 40
 START_YEAR = 2015
@@ -10,10 +11,21 @@ END_YEAR = 2017
 END_MONTH = 11
 COUNT = 0
 banned_artist = ["Ed Sheeran","Maroon 5","Adele","Lasse Lindh","The Chainsmokers","The Chainsmokers & Coldplay"]
+necessary_songs = {}
+
 def update_month(year,month):
     if month<12:
         return [year,month+1]
     return [year+1,1]
+
+def get_resolved_list():
+
+    global necessary_songs
+    f = open("nb_resolved_songs.txt","r",encoding='utf-8').readlines()
+    for line in f:
+        line = line.split('(')[0].strip()
+        necessary_songs[line] = 1
+    return
 
 def get_song_info(id):
     song_info_url = "http://www.genie.co.kr/detail/songInfo?xgnm=" + str(id)
@@ -37,9 +49,17 @@ def get_song_info(id):
     else:
         lyrics = ""
 
+
     if artist in banned_artist:
         return [song_name,artist,""]
     #print(song_name,artist,lyrics)
+    global valid_chars
+    song_name = song_name.split('(')[0].strip()
+    if song_name in necessary_songs:
+        song_name = ''.join(c for c in song_name if c in valid_chars)
+        with open("resolved_lyrics/" + song_name+ ".txt","w",encoding='utf-8') as g:
+            g.write(lyrics + "\n")
+
     return [song_name,artist,lyrics]
 def get_fname(year,month):
     year = int(year)
@@ -70,21 +90,25 @@ def parse_month(year,month):
         song_names[i],artists[i],lyrics[i] = get_song_info(song_ids[i])
         #(song_names[i])
 
-    with open("billboard_data/bb" + str(COUNT) + "_lyrics.txt", 'w',encoding = 'utf-8') as file:
-        for i in range(SONG_PER_MONTH):
-            #print(song_names[i])
-            lyrics[i] = lyrics[i].replace('\r\n', '\n')
-            file.write(lyrics[i].replace('\n',' ') + "\n")
-
-    with open("billboard_data/bb" + str(COUNT) + "_songs.txt", 'w',encoding = 'utf-8') as file:
-        for i in range(SONG_PER_MONTH):
-            file.write(song_names[i]+ ":" + artists[i] + "\n")
+    # with open("billboard_data/bb" + str(COUNT) + "_lyrics.txt", 'w',encoding = 'utf-8') as file:
+    #     for i in range(SONG_PER_MONTH):
+    #         #print(song_names[i])
+    #         lyrics[i] = lyrics[i].replace('\r\n', '\n')
+    #         file.write(lyrics[i].replace('\n',' ') + "\n")
+    #
+    # with open("billboard_data/bb" + str(COUNT) + "_songs.txt", 'w',encoding = 'utf-8') as file:
+    #     for i in range(SONG_PER_MONTH):
+    #         file.write(song_names[i]+ ":" + artists[i] + "\n")
 
     COUNT += 1
     return [song_names,artists,lyrics]
 
 cur_year = START_YEAR
 cur_month = START_MONTH
+
+get_resolved_list()
+print(necessary_songs)
+valid_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)
 
 while(cur_year != END_YEAR or cur_month != END_MONTH):
     parse_month(cur_year, cur_month)
