@@ -28,6 +28,18 @@ def count_neg(num, mode):
 		for pos_word in Pos:
 			if pos_word in word:
 				pos += 1
+
+	if mode == 'nrb':
+		ff = open('noraebang_data/missing'+str1+'_songs.txt','r',encoding='UTF8')
+		for word in words: 
+			for neg_word in Neg:
+				if neg_word in word:
+					neg += 1
+			for pos_word in Pos:
+				if pos_word in word:
+					pos += 1
+
+
 	if mode == 'nrb':
 		return pos, neg, len(words)
 	return pos, neg
