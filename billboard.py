@@ -55,8 +55,11 @@ def get_song_info(id):
     #print(song_name,artist,lyrics)
     global valid_chars
     song_name = song_name.split('(')[0].strip()
+    banned_chars = '<>:"/|?*\\'
     if song_name in necessary_songs:
-        song_name = ''.join(c for c in song_name if c in valid_chars)
+        for c in banned_chars:
+            song_name = song_name.replace(c, '')
+
         with open("resolved_lyrics/" + song_name+ ".txt","w",encoding='utf-8') as g:
             g.write(lyrics + "\n")
 

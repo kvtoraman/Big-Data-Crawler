@@ -13,9 +13,8 @@ def fill_resolved_songs():
         line = line.split('(')[0].strip()
         resolved_songs[line] = 1
 
-
-
     return
+
 def NRBcrwal(song_name,name,fname):
     targetUrl = "https://m.search.naver.com/search.naver?where=m&query="+parse.quote(name)
     targetRequest = Request(targetUrl)
@@ -48,20 +47,26 @@ for i in range(Num):
     strw = 'noraebang_data/nrb_lyrics' + str(i) + '.txt'
     fw = open(strw,'w',encoding='UTF8')
     line = fr.read().split('\n')
+    fee = open('noraebang_data/Error_Song'+str(i)+'.txt','w',encoding='UTF8')
     
     
-    for lst in line:
-        NRBcrwal(lst.split(':')[0],lst+'+가사', fw)
-    print('res:', len(resolved), "unres", len(unresolved))
 
-with open("nb_UNresolved_songs.txt", 'w', encoding='utf-8') as file:
-    for key in unresolved:
-        print(key)
-        file.write(key + "\n")
+#     for lst in line:
+#         NRBcrwal(lst.split(':')[0],lst+'+가사', fw)
+#     print('res:', len(resolved), "unres", len(unresolved))
+#
+# with open("nb_UNresolved_songs.txt", 'w', encoding='utf-8') as file:
+#     for key in unresolved:
+#         print(key)
+#         file.write(key + "\n")
+#
+# with open("nb_resolved_songs.txt", 'w', encoding='utf-8') as file:
+#     for key in resolved:
+#         print(key)
+#         file.write(key + "\n")
 
-with open("nb_resolved_songs.txt", 'w', encoding='utf-8') as file:
-    for key in resolved:
-        print(key)
-        file.write(key + "\n")
+    for j in range(len(line)):
+        NRBcrwal(line[j], fw, j, fee)
+
 
                 #NRBcrwal('윤종신+좋니')
