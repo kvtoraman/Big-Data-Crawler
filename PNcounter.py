@@ -41,8 +41,8 @@ def count_neg(num, mode):
 
 
 	if mode == 'nrb':
-		return pos, neg, len(words)
-	return pos, neg
+		return pos/len(words), neg/len(words), len(words)
+	return pos/len(words), neg/len(words)
 
 f = open('PNdata.csv' ,'w' , encoding = 'utf-8', newline='')
 wr = csv.writer(f)
